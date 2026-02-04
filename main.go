@@ -1,12 +1,15 @@
 package main
 
 import (
+	"Go-Service/database"
 	"Go-Service/handlers"
 	"fmt"
 	"net/http"
 )
 
 func main() {
+	database.ConnectDatabase()
+
 	// HTTP 路由
 	http.HandleFunc("/health", handlers.HealthHandler)
 	http.HandleFunc("/user", func(writer http.ResponseWriter, request *http.Request) {
