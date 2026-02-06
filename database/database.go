@@ -20,9 +20,3 @@ func ConnectDatabase() {
 		panic("failed to auto migrate database")
 	}
 }
-
-type User struct {
-	ID    int    `gorm:"primaryKey"`
-	Name  string `gorm:"size:100"`
-	Email string `gorm:"size:100;unique"`
-}

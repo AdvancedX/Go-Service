@@ -1,5 +1,12 @@
 package database
 
+type User struct {
+	ID           int    `gorm:"primaryKey"`
+	Name         string `gorm:"size:100"`
+	Email        string `gorm:"size:100;unique"`
+	PasswordHash string `gorm:"size:255" json:"-"`
+}
+
 // CreateUser 保存用户到数据库
 func CreateUser(user *User) error {
 	result := DB.Create(user) // 使用 GORM 将数据持久化
@@ -40,6 +47,15 @@ func UpdateUser(id int, updatedUser *User) error {
 func GetUserByID(id int) (*User, error) {
 	var user User
 	result := DB.First(&user, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	result := DB.Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}

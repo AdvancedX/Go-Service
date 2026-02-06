@@ -2,13 +2,11 @@ package handlers
 
 import (
 	"Go-Service/database"
-	"Go-Service/models"
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 )
-
-var users []models.User
 
 // CreateUserHandler Create User
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,8 +37,9 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 func DeleteUserByIDHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
-	idStr := r.URL.Query().Get("id")
+	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid input ID", http.StatusBadRequest)
@@ -78,7 +77,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	idStr := r.URL.Query().Get("id")
+	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 	if idStr == "" {
 		http.Error(w, "ID is required", http.StatusBadRequest)
 		return
@@ -108,7 +107,7 @@ func FindUserByIDHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	idStr := r.URL.Query().Get("id")
+	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 	var id int
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

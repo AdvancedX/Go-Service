@@ -12,20 +12,26 @@ func main() {
 
 	// HTTP 路由
 	http.HandleFunc("/health", handlers.HealthHandler)
-	http.HandleFunc("/user", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/users", func(writer http.ResponseWriter, request *http.Request) {
 		switch request.Method {
 		case http.MethodPost:
 			handlers.CreateUserHandler(writer, request)
 		case http.MethodGet:
-			if id := request.URL.Query().Get("id"); id == "" {
-				handlers.ListUsersHandler(writer, request)
-			} else {
-				handlers.FindUserByIDHandler(writer, request)
-			}
+			handlers.ListUsersHandler(writer, request)
+		default:
+			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+	http.HandleFunc("/users/", func(writer http.ResponseWriter, request *http.Request) {
+		switch request.Method {
+		case http.MethodGet:
+			handlers.FindUserByIDHandler(writer, request)
 		case http.MethodDelete:
 			handlers.DeleteUserByIDHandler(writer, request)
 		case http.MethodPut:
 			handlers.UpdateUserHandler(writer, request)
+		default:
+			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	})
 	// 启动 HTTP 服务，监听端口 8080
