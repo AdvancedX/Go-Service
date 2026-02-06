@@ -3,6 +3,7 @@ package main
 import (
 	"Go-Service/database"
 	"Go-Service/handlers"
+	"Go-Service/middleware"
 	"fmt"
 	"net/http"
 )
@@ -12,7 +13,9 @@ func main() {
 
 	// HTTP 路由
 	http.HandleFunc("/health", handlers.HealthHandler)
-	http.HandleFunc("/users", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/auth/register", handlers.RegisterHandler)
+	http.HandleFunc("/auth/login", handlers.LoginHandler)
+	http.Handle("/users", middleware.JWTAuth(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		switch request.Method {
 		case http.MethodPost:
 			handlers.CreateUserHandler(writer, request)
@@ -21,8 +24,8 @@ func main() {
 		default:
 			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
 		}
-	})
-	http.HandleFunc("/users/", func(writer http.ResponseWriter, request *http.Request) {
+	})))
+	http.Handle("/users/", middleware.JWTAuth(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		switch request.Method {
 		case http.MethodGet:
 			handlers.FindUserByIDHandler(writer, request)
@@ -33,7 +36,7 @@ func main() {
 		default:
 			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
 		}
-	})
+	})))
 	// 启动 HTTP 服务，监听端口 8080
 	fmt.Println("Starting server on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
