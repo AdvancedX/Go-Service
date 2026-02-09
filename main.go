@@ -37,6 +37,28 @@ func main() {
 			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	})))
+	http.HandleFunc("/posts", func(writer http.ResponseWriter, request *http.Request) {
+		switch request.Method {
+		case http.MethodPost:
+			middleware.JWTAuth(http.HandlerFunc(handlers.CreatePostHandler)).ServeHTTP(writer, request)
+		case http.MethodGet:
+			handlers.ListPublishedPostsHandler(writer, request)
+		default:
+			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+	http.HandleFunc("/posts/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			handlers.GetPublishedPostByIDHandler(w, r) // 公开：仅 published
+		case http.MethodPut:
+			middleware.JWTAuth(http.HandlerFunc(handlers.UpdatePostHandler)).ServeHTTP(w, r)
+		case http.MethodDelete:
+			middleware.JWTAuth(http.HandlerFunc(handlers.DeletePostHandler)).ServeHTTP(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
 	// 启动 HTTP 服务，监听端口 8080
 	fmt.Println("Starting server on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

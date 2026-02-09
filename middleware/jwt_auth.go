@@ -9,7 +9,7 @@ import (
 
 type ctxKey string
 
-const userIDKey ctxKey = "userID"
+const UserIDKey ctxKey = "userID"
 
 func JWTAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -27,10 +27,16 @@ func JWTAuth(next http.Handler) http.Handler {
 		}
 		claims, err := auth.ParseJWT(parts[1])
 		if err != nil {
-			http.Error(w, "Invade token", http.StatusUnauthorized)
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
-		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
+		ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetUserID(ctx context.Context) (int64, bool) {
+	v := ctx.Value(UserIDKey)
+	id, ok := v.(int64)
+	return id, ok
 }
